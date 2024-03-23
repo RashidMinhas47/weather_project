@@ -1,7 +1,7 @@
 import 'package:geolocator/geolocator.dart';
 import 'package:weather_project/services/location.dart';
 import 'package:weather_project/services/network_helper.dart';
-
+//https://api.openweathermap.org/data/2.5/weather?lat=33&lon=33.4&appid=56c71e1bc043af16e897454bb23894c4&units=metric
 const apiKey = '56c71e1bc043af16e897454bb23894c4';
 const openWeatherMapURL = 'https://api.openweathermap.org/data/2.5/weather';
 

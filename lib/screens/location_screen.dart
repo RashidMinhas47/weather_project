@@ -1,4 +1,8 @@
+import 'dart:ui';
+
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:weather_project/screens/city_screen.dart';
 import 'package:weather_project/utils/constants.dart';
@@ -24,6 +28,11 @@ class _LocationScreenState extends State<LocationScreen> {
 
   String weatherMessage = '0';
 
+  int sunset = 0;
+  int sunrise = 0;
+  double tempMax = 0;
+  double tempMin  = 0;
+
   @override
   void initState() {
     super.initState();
@@ -46,16 +55,35 @@ class _LocationScreenState extends State<LocationScreen> {
       weatherIcon = weather.getWeatherIcon(condition);
       weatherMessage = weather.getMessage(temperature);
       cityName = weatherData['name'];
+      sunrise = weatherData['sys']['sunrise'];
+      sunset = weatherData['sys']['sunset'];
+      tempMax = weatherData['main']['temp_max'];
+      tempMin = weatherData['main']['temp_min'];
     });
   }
+/// for time
+  String _formatTime(DateTime dateTime) {
+    String period = dateTime.hour >= 12 ? 'PM' : 'AM';
+    int hour = dateTime.hour > 12 ? dateTime.hour - 12 : dateTime.hour;
+    hour = hour == 0 ? 12 : hour;
+    String minute = dateTime.minute < 10 ? '0${dateTime.minute}' : '${dateTime.minute}';
+    return '$hour:$minute $period';
+  }
+  ///for date
+  String _formatDate(DateTime dateTime) {
+    String month = dateTime.month.toString().padLeft(2, '0');
+    String day = dateTime.day.toString().padLeft(2, '0');
+    String year = dateTime.year.toString();
+    return '$year-$month-$day';
+  }
 
-  getCurrentLocationWeahter() async {
+  getCurrentLocationWeather() async {
     var weatherData = await weather.getLocationWeather();
 
     updateUI(weatherData);
   }
 
-  getWeatherBySearh() async {
+  getWeatherBySearch() async {
     var typedName = await Navigator.push(
       context,
       MaterialPageRoute(
@@ -101,11 +129,11 @@ class _LocationScreenState extends State<LocationScreen> {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: <Widget>[
                     TextButton(
-                      onPressed: getCurrentLocationWeahter,
+                      onPressed: getCurrentLocationWeather,
                       child: kLocationIcon,
                     ),
                     TextButton(
-                      onPressed: getWeatherBySearh,
+                      onPressed: getWeatherBySearch,
                       child: kCityIcon,
                     ),
                   ],
@@ -115,16 +143,40 @@ class _LocationScreenState extends State<LocationScreen> {
                 padding: kRight15Pad,
                 child: Row(
                   children: <Widget>[
-                    Text('$temperature°',
-                        style: GoogleFonts.actor(
-                          fontSize: 100,
-                          fontWeight: FontWeight.bold,
-                        )),
-                    Text(
+                    SizedBox(width: 15,),
+                    Column(
+                      children: [
+                        Text('$temperature°',
+                            style: GoogleFonts.actor(
+                              fontSize: 100,
+                              fontWeight: FontWeight.bold,
+                            )),
+                        Text("Precipitations",
+                        style: GoogleFonts.poppins(
+                          fontSize:26,
+                        ),
+                        ),
+                        Row(
+                          children: [
+                            Text('Max °: ${tempMax.roundToDouble().toString()}',style: GoogleFonts.poppins(
+                              fontSize:16,
+                            ),),
+                            SizedBox(width: 20,),
+                            Text('Min °: ${tempMin.roundToDouble().toString()}',style: GoogleFonts.poppins(
+                              fontSize:16,
+                            ),),
+                          ],
+                        ),
+
+
+                      ],
+                    ), Text(
                       weatherIcon,
                       style: kConditionTextStyle,
                     ),
                   ],
+
+                  
                 ),
               ),
               Padding(
@@ -138,6 +190,126 @@ class _LocationScreenState extends State<LocationScreen> {
                   ),
                 ),
               ),
+              Row(
+                children: [
+                  Expanded(
+                    child: Container(
+                      padding: EdgeInsets.all(25),
+                      width: 200,
+                      height: 190,
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(20),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.blue.withOpacity(0.2),
+                            spreadRadius: 5,
+                            blurRadius: 20,
+                            offset: Offset(0, 10),
+                          ),
+                        ],
+                      ),
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(20),
+                        child: BackdropFilter(
+                          filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+                          child: Container(
+                            decoration: BoxDecoration(
+                              color: Colors.white.withOpacity(0.1),
+                              borderRadius: BorderRadius.circular(20),
+                              border: Border.all(
+                                color: Colors.white.withOpacity(0.2),
+                                width: 1,
+                              ),
+                            ),
+                            padding: EdgeInsets.all(20),
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Row(
+                                  children: [
+                                    Text("Sunrise",style: TextStyle(fontSize: 20),),
+                                    Spacer(),
+                                    Icon(Icons.sunny,color: Colors.yellow,),
+                                  ],
+                                ),
+                                SizedBox(height: 5,),
+                                Text('${_formatTime(DateTime.fromMillisecondsSinceEpoch(sunrise * 1000))}',
+                                  style: TextStyle(fontSize: 16),
+                                ),
+                                SizedBox(height: 10),
+                                Text('${_formatDate(DateTime.fromMillisecondsSinceEpoch(sunrise * 1000))}',
+                                  style: TextStyle(fontSize: 16),
+                                ),
+
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                  Expanded(
+                    child: Container(
+                      padding: EdgeInsets.all(25),
+                      width: 200,
+                      height: 190,
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(20),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.blue.withOpacity(0.2),
+                            spreadRadius: 5,
+                            blurRadius: 20,
+                            offset: Offset(0, 10),
+                          ),
+                        ],
+                      ),
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(20),
+                        child: BackdropFilter(
+                          filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+                          child: Container(
+                            decoration: BoxDecoration(
+                              color: Colors.white.withOpacity(0.1),
+                              borderRadius: BorderRadius.circular(20),
+                              border: Border.all(
+                                color: Colors.white.withOpacity(0.2),
+                                width: 1,
+                              ),
+                            ),
+                            padding: EdgeInsets.all(20),
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Row(
+                                  children: [
+                                    Text("Sunset",style: TextStyle(fontSize: 20),),
+                                    Spacer(),
+                                    Icon(Icons.nightlight,),
+                                  ],
+                                ),
+                                SizedBox(height: 5,),
+                                Text('${_formatTime(DateTime.fromMillisecondsSinceEpoch(sunset * 1000))}',
+                                  style: TextStyle(fontSize: 16),
+                                ),
+                                SizedBox(height: 10),
+                                Text('${_formatDate(DateTime.fromMillisecondsSinceEpoch(sunrise * 1000))}',
+                                  style: TextStyle(fontSize: 16),
+                                ),
+
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+
+                ],
+              ),
+
             ],
           ),
         ),
@@ -147,7 +319,7 @@ class _LocationScreenState extends State<LocationScreen> {
 }
 
 //Constant Files......
-const kRight15Pad = EdgeInsets.only(right: 15.0);
+const kRight15Pad = EdgeInsets.only(right: 15.0,left: 5);
 
 const kPadd10 = EdgeInsets.all(10);
 
